@@ -1,0 +1,1 @@
+-- Parlai Milestone 3 schema (see Supabase migration history for live state)

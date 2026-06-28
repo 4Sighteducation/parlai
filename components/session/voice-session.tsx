@@ -178,13 +178,16 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
         throw new Error(data.error ?? "Could not save session");
       }
 
-      router.push(allowOnboarding ? "/onboarding" : "/home");
+      const data = await response.json();
+      const sessionId = data.id as string;
+
+      router.push(`/debrief/${sessionId}`);
       router.refresh();
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Could not save session");
     }
-  }, [allowOnboarding, cleanup, router]);
+  }, [cleanup, router]);
 
   const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
   const secs = String(seconds % 60).padStart(2, "0");
@@ -211,7 +214,7 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
           {status === "idle" && "Ready to talk"}
           {status === "connecting" && "Connecting…"}
           {status === "live" && "Giulia is listening"}
-          {status === "saving" && "Saving session…"}
+          {status === "saving" && "Analysing session…"}
           {status === "error" && "Something went wrong"}
         </p>
         <p className="mt-2 max-w-sm text-sm text-stone-600">{DEFAULT_SCENARIO}</p>

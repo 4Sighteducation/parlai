@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Parlai
 
-## Getting Started
+Voice-first conversational Italian tutor for the household. Talk with Giulia, get a written debrief, and build a shared family context over time.
 
-First, run the development server:
+- **Production:** https://parlai.live
+- **GitHub:** https://github.com/4Sighteducation/parlai
+- **Supabase project:** `ozptjapwgiiysfuqmjby`
+- **Vercel project:** `parlai` (auto-deploys from GitHub)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Local development
+
+This folder **is** the Git repo — linked to `origin` on GitHub. Clone path:
+
+```text
+C:\Users\tonyd\OneDrive - 4Sight Education Ltd\Apps\Parlai
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+npm install
+cp .env.example .env.local   # then fill in secrets
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment variables
 
-## Learn More
+See `.env.example`. Required for full functionality:
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase API URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser Supabase key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only writes (if needed) |
+| `OPENAI_API_KEY` | Realtime voice + analysis (server only) |
+| `REALTIME_MODEL` | `gpt-realtime-2` |
+| `ANALYSIS_MODEL` | `gpt-5.4-mini` (Layer B debrief) |
+| `NEXT_PUBLIC_AUTH_PROVIDER` | `google` (default) or `apple` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Leave `NEXT_PUBLIC_SSO_DOMAIN` empty unless using SAML SSO.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
+Pushes to `master` on GitHub trigger Vercel. Production branch should be set to **master** in Vercel → Settings → Git.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Manual production deploy:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+vercel deploy --prod
+```
+
+## Milestones
+
+| # | Status | What |
+|---|--------|------|
+| 1 | Done | Scaffold, Supabase, Vercel |
+| 2 | Done | Realtime voice (WebRTC) |
+| 3 | Done | Auth, schema, session persistence, household context |
+| 4 | Done | Reflection loop, debrief, auto-harvest proposals |
+| 5 | Next | Inject context into live sessions |
+| 6 | Planned | Onboarding / placement |
+| 7 | Planned | Polish + cost logging |
+
+## Auth redirect URLs (Supabase)
+
+Add to Supabase → Authentication → URL configuration:
+
+- `https://parlai.live/auth/callback`
+- `http://localhost:3000/auth/callback`
+
+Google/Apple OAuth redirect URIs point at Supabase (`…/auth/v1/callback`), not Parlai directly — see setup notes in project chat history.

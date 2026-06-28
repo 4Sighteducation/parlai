@@ -1,5 +1,6 @@
 import { requireProfile } from "@/lib/auth/profile";
 import { ContextAdmin } from "@/components/admin/context-admin";
+import { PendingHarvestList } from "@/components/home/pending-harvest-list";
 
 export default async function ContextAdminPage() {
   await requireProfile();
@@ -14,7 +15,8 @@ export default async function ContextAdminPage() {
         Shared people, places, and family details — stored in your Supabase, never
         hardcoded into prompts.
       </p>
-      <div className="mt-8">
+      <div className="mt-8 space-y-8">
+        <PendingHarvestList />
         <ContextAdmin />
       </div>
     </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUnboardedProfile } from "@/lib/auth/profile";
+import { PendingHarvestList } from "@/components/home/pending-harvest-list";
 
 export default async function OnboardingPage() {
   const { profile } = await requireUnboardedProfile();
@@ -18,12 +19,16 @@ export default async function OnboardingPage() {
         arrives in Milestone 6; for now you can jump into a conversation.
       </p>
 
-      <Link
-        href="/session"
-        className="mt-10 inline-flex h-12 items-center justify-center rounded-full bg-emerald-800 px-6 text-sm font-medium text-white hover:bg-emerald-900"
-      >
-        Start first conversation
-      </Link>
+      <div className="mt-10 space-y-6">
+        <PendingHarvestList />
+
+        <Link
+          href="/session"
+          className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-800 px-6 text-sm font-medium text-white hover:bg-emerald-900"
+        >
+          Start first conversation
+        </Link>
+      </div>
 
       <Link
         href="/admin/context"

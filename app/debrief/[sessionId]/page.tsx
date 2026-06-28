@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DebriefView } from "@/components/debrief/debrief-view";
 import { requireProfile } from "@/lib/auth/profile";

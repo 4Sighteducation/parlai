@@ -1,0 +1,38 @@
+Personal context CSV import
+===========================
+
+1. Find your household_id in Supabase:
+   Table Editor → households → copy the id column (one row for your family).
+
+2. Open data/personal_context_import.csv in Excel or a text editor.
+
+3. Replace every REPLACE-WITH-YOUR-HOUSEHOLD-UUID with that id.
+
+4. Edit the example rows — replace names, places, and trips with your real
+   family details. Add or remove rows as needed.
+
+5. Import in Supabase:
+   Table Editor → personal_context → Insert → Import data from CSV
+   (or use the SQL editor — see below)
+
+Categories (must match exactly):
+  person | place | food | trip | joke | regional | interest
+
+Columns:
+  household_id  — UUID from households table (same for every row)
+  category      — see above
+  label         — short name Giulia can reference
+  detail        — a sentence or two of context
+  tags          — comma-separated inside the cell, no spaces required
+  source        — use seed for manual imports
+  active        — true to use in sessions (M5+), false to keep as draft
+
+Quick SQL alternative (after editing the CSV values):
+
+  -- paste rows as INSERT statements, or use Supabase CSV import on the table.
+
+Notes:
+  - Do not put real secrets in git if you commit a filled-in copy — keep your
+    completed CSV local or import then delete the filled file.
+  - Harvested rows from conversations use source=harvested and active=false;
+    your manual imports should use source=seed and active=true.

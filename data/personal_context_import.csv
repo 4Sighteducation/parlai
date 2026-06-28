@@ -1,0 +1,10 @@
+household_id,category,label,detail,tags,source,active
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,person,Nonna Rosa,Warm grandmother who loves cooking and Sunday lunches,"family,home",seed,true
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,person,Marco,Your brother — works in Milan and visits at Christmas,"family",seed,true
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,place,The local piazza,Where neighbours gather in the evening,"community,home",seed,true
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,food,Caffè al bar,Morning espresso standing at the counter,"coffee,daily-life",seed,true
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,trip,Lake Garda summer trip,Annual family week by the lake in August,"travel,summer,family",seed,true
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,place,Bari old town,Family roots in Puglia — narrow streets and sea air,"travel,puglia,family",seed,true
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,interest,Football,Juventus on Sunday afternoons — easy small-talk topic,"sport,hobby",seed,true
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,regional,Pugliese flavour,Occasionally flavour speech with simple Pugliese expressions,"dialect,puglia",seed,true
+REPLACE-WITH-YOUR-HOUSEHOLD-UUID,joke,Nonna's espresso rule,She says un caffè senza sorriso non è un caffè,"family,humour",seed,true

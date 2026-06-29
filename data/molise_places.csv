@@ -1,0 +1,8 @@
+household_id,category,label,detail,tags,source,active
+5a36aff1-0715-4536-b928-63f8660c94da,place,Rocchetta al Volturno,"Small rural town in Molise where the family stays. Quiet, not touristy.","home,molise",seed,true
+5a36aff1-0715-4536-b928-63f8660c94da,place,Casa Stella,"Family holiday home above Rocchetta al Volturno — secluded, three levels, terrace, garden backing onto forest.","home,family,molise",seed,true
+5a36aff1-0715-4536-b928-63f8660c94da,place,Scapoli,"Nearby Molise town — home to Terra Nostra pizzeria.","molise,local",seed,true
+5a36aff1-0715-4536-b928-63f8660c94da,place,Colli,"Nearby Molise town — home to The Volturno restaurant.","molise,local",seed,true
+5a36aff1-0715-4536-b928-63f8660c94da,food,Terra Nostra,"Pizzeria in Scapoli the family has visited for over 20 years.","food,pizza,local",seed,true
+5a36aff1-0715-4536-b928-63f8660c94da,food,The Volturno,"Upmarket a la carte restaurant in Colli — a local favourite for special meals.","food,restaurant,local",seed,true
+5a36aff1-0715-4536-b928-63f8660c94da,regional,Molise character,"Molise is rural, quiet, and not at all touristy. Speak slowly and simply. Warm local flavour when natural.","molise,dialect",seed,true

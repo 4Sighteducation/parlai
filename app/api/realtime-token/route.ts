@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { assembleContextBlock, pickScenario } from "@/lib/realtime/assemble-context";
+import { buildSessionInstructions, REALTIME_VOICE } from "@/lib/realtime/tutor-prompt";
 import { createClient } from "@/lib/supabase/server";
-import { buildSessionInstructions } from "@/lib/realtime/tutor-prompt";
 
 export async function POST() {
   const supabase = await createClient();
@@ -22,12 +23,50 @@ export async function POST() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("cefr_level")
+    .select("cefr_level, onboarded, household_id")
     .eq("id", user.id)
     .single();
 
+  if (!profile) {
+    return NextResponse.json({ error: "Profile not found" }, { status: 400 });
+  }
+
+  const level = profile.onboarded ? profile.cefr_level : "A1";
+
+  const [{ data: learnerState }, { data: dueVocab }, { data: personalContext }] =
+    await Promise.all([
+      supabase.from("learner_state").select("*").eq("user_id", user.id).maybeSingle(),
+      supabase
+        .from("vocab_items")
+        .select("*")
+        .eq("user_id", user.id)
+        .lte("due_at", new Date().toISOString())
+        .limit(6),
+      supabase
+        .from("personal_context")
+        .select("*")
+        .eq("household_id", profile.household_id)
+        .eq("active", true)
+        .limit(12),
+    ]);
+
+  const scenario = pickScenario({
+    level,
+    onboarded: profile.onboarded,
+    nextFocus: learnerState?.next_focus,
+  });
+
+  const contextBlock = assembleContextBlock({
+    level,
+    scenario,
+    learnerState,
+    dueVocab: dueVocab ?? [],
+    personalContext: personalContext ?? [],
+  });
+
+  const instructions = buildSessionInstructions(contextBlock);
   const model = process.env.REALTIME_MODEL ?? "gpt-realtime-2";
-  const instructions = buildSessionInstructions(profile?.cefr_level ?? "A2");
+  const voice = process.env.REALTIME_VOICE ?? REALTIME_VOICE;
 
   const response = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
     method: "POST",
@@ -47,7 +86,7 @@ export async function POST() {
             turn_detection: { type: "semantic_vad" },
           },
           output: {
-            voice: "cedar",
+            voice,
           },
         },
       },
@@ -63,5 +102,9 @@ export async function POST() {
   }
 
   const data = await response.json();
-  return NextResponse.json(data);
+  return NextResponse.json({
+    ...data,
+    scenario,
+    level,
+  });
 }

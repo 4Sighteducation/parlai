@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { StarterVocab } from "@/components/session/starter-vocab";
 import { estimateRealtimeCost } from "@/lib/realtime/cost";
-import { DEFAULT_SCENARIO } from "@/lib/realtime/tutor-prompt";
+import type { SessionScenario } from "@/lib/realtime/assemble-context";
 import type { TranscriptEntry } from "@/lib/types/database";
 
 type SessionStatus = "idle" | "connecting" | "live" | "saving" | "error";
@@ -14,18 +15,25 @@ type VoiceSessionProps = {
   allowOnboarding?: boolean;
 };
 
+const DEFAULT_SCENARIO: SessionScenario = {
+  title: "Incontro con Giulia",
+  description: "Giulia si presenta e fa poche domande semplici.",
+  starterVocab: [],
+};
+
 export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
   const router = useRouter();
   const [status, setStatus] = useState<SessionStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
-  const [helpEnglish, setHelpEnglish] = useState(false);
+  const [scenario, setScenario] = useState<SessionScenario>(DEFAULT_SCENARIO);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const startedAtRef = useRef<string | null>(null);
+  const scenarioRef = useRef(DEFAULT_SCENARIO);
   const transcriptRef = useRef<TranscriptEntry[]>([]);
   const inputTokensRef = useRef(0);
   const outputTokensRef = useRef(0);
@@ -56,9 +64,6 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
         transcript?: string;
         response?: {
           usage?: { input_tokens?: number; output_tokens?: number };
-          output?: Array<{
-            content?: Array<{ type?: string; transcript?: string; text?: string }>;
-          }>;
         };
       };
 
@@ -97,6 +102,11 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
 
       if (!tokenResponse.ok) {
         throw new Error(tokenData.error ?? "Could not start session");
+      }
+
+      if (tokenData.scenario) {
+        setScenario(tokenData.scenario);
+        scenarioRef.current = tokenData.scenario;
       }
 
       const ephemeralKey = tokenData.value as string;
@@ -165,7 +175,7 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           startedAt: startedAtRef.current ?? new Date().toISOString(),
-          scenario: DEFAULT_SCENARIO,
+          scenario: scenarioRef.current.description,
           transcript: transcriptRef.current,
           inputTokens,
           outputTokens,
@@ -179,9 +189,7 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
       }
 
       const data = await response.json();
-      const sessionId = data.id as string;
-
-      router.push(`/debrief/${sessionId}`);
+      router.push(`/debrief/${data.id as string}`);
       router.refresh();
     } catch (err) {
       setStatus("error");
@@ -191,15 +199,22 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
 
   const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
   const secs = String(seconds % 60).padStart(2, "0");
+  const showVocab = status === "idle" || status === "live" || status === "connecting";
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-6 py-10">
-      <div className="mb-8 flex items-center justify-between text-sm text-stone-500">
+      <div className="mb-6 flex items-center justify-between text-sm text-stone-500">
         <Link href={allowOnboarding ? "/onboarding" : "/home"}>← Back</Link>
         <span>
           Level {level} · {minutes}:{secs}
         </span>
       </div>
+
+      {showVocab && scenario.starterVocab.length > 0 ? (
+        <div className="mb-6">
+          <StarterVocab words={scenario.starterVocab} />
+        </div>
+      ) : null}
 
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <div
@@ -211,13 +226,14 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
           aria-hidden
         />
         <p className="text-lg font-medium text-stone-900">
-          {status === "idle" && "Ready to talk"}
+          {status === "idle" && "Ready to talk with Giulia"}
           {status === "connecting" && "Connecting…"}
           {status === "live" && "Giulia is listening"}
           {status === "saving" && "Analysing session…"}
           {status === "error" && "Something went wrong"}
         </p>
-        <p className="mt-2 max-w-sm text-sm text-stone-600">{DEFAULT_SCENARIO}</p>
+        <p className="mt-2 text-base font-medium text-stone-800">{scenario.title}</p>
+        <p className="mt-1 max-w-sm text-sm text-stone-600">{scenario.description}</p>
       </div>
 
       <div className="mt-8 space-y-3">
@@ -227,27 +243,18 @@ export function VoiceSession({ level, allowOnboarding }: VoiceSessionProps) {
             onClick={startSession}
             className="w-full rounded-full bg-emerald-800 py-3 text-sm font-medium text-white hover:bg-emerald-900"
           >
-            {status === "error" ? "Try again" : "Start conversation"}
+            {status === "error" ? "Try again" : "Inizia"}
           </button>
         ) : null}
 
         {status === "live" ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setHelpEnglish((value) => !value)}
-              className="w-full rounded-full border border-stone-300 py-3 text-sm text-stone-700"
-            >
-              {helpEnglish ? "Back to Italian" : "Help in English"}
-            </button>
-            <button
-              type="button"
-              onClick={endSession}
-              className="w-full rounded-full bg-stone-900 py-3 text-sm font-medium text-white hover:bg-stone-800"
-            >
-              End session
-            </button>
-          </>
+          <button
+            type="button"
+            onClick={endSession}
+            className="w-full rounded-full bg-stone-900 py-3 text-sm font-medium text-white hover:bg-stone-800"
+          >
+            End session
+          </button>
         ) : null}
       </div>
 
